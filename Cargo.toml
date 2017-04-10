@@ -1,0 +1,15 @@
+[package]
+name = "dailyedx"
+version = "0.1.0"
+authors = ["J. Cliff Dyer <jcd@sdf.org>"]
+
+[dependencies]
+rocket = "0.2"
+rocket_codegen = "0.2"
+serde = "0.9"
+serde_derive = "0.9"
+
+[dependencies.rocket_contrib]
+version = "*"
+default-features = false
+features = ["json", "handlebars_templates"]
