@@ -31,7 +31,7 @@ impl CourseKey {
 
 impl fmt::Display for CourseKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "course-v1:{}", self.short_fmt()) 
+        write!(f, "course-v1:{}", self.short_fmt())
     }
 }
 
@@ -116,8 +116,8 @@ impl Serialize for UsageKey {
 
 fn at_split<'a>(s: &'a str, category: &'a str) -> Option<&'a str> {
     let mut iter = s.splitn(3, "@");
-    match (iter.nth(0), iter.nth(1), iter.nth(2)) {
-        (Some(x), Some(second), None) if x == category => Some(second),
+    match (iter.next(), iter.next(), iter.next()) {
+        (Some(cat), Some(second), None) if cat == category => Some(second),
         _ => None,
     }
 }
@@ -177,7 +177,7 @@ mod tests {
         let key = CourseKey {
             org: "BerkeleyX".to_string(),
             course: "BC49".to_string(),
-            run: "2017T1".to_string(), 
+            run: "2017T1".to_string(),
         };
         assert_eq!(&format!("{}", key), "course-v1:BerkeleyX+BC49+2017T1");
     }
@@ -197,7 +197,7 @@ mod tests {
         let course = CourseKey::new(
             "BerkeleyX".to_string(),
             "BC49".to_string(),
-            "2017T1".to_string(), 
+            "2017T1".to_string(),
         );
         let usage_key = UsageKey::new(
             course,
@@ -228,5 +228,31 @@ mod tests {
             Ok(CourseKey::new("org".to_string(), "course".to_string(), "run".to_string()))
         );
     }
-}
 
+    #[test]
+    fn parse_usage_key() {
+        let ok_key: Result<UsageKey, String> = "block-v1:org+course+run+type@vertical+block@block1".parse();
+        assert_eq!(
+            ok_key,
+            Ok(UsageKey::new("course-v1:org+course+run".parse().unwrap(), Vertical, "block1".to_string()))
+        );
+    }
+
+    #[test]
+    fn round_trip_course_key() {
+        let key = "course-v1:BerkeleyX+BC49+2017T1".to_string();
+        let parsed_key: CourseKey = key.parse().unwrap();
+        assert_eq!(
+            key, format!("{}", parsed_key)
+        );
+    }
+
+    #[test]
+    fn round_trip_usage_key() {
+        let key = "block-v1:LongfellowX+PaulReveresRide+1775T1+type@vertical+block@signal".to_string();
+        let parsed_key: UsageKey = key.parse().unwrap();
+        assert_eq!(
+            key, format!("{}", parsed_key)
+        );
+    }
+}

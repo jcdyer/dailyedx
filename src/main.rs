@@ -41,7 +41,7 @@ fn how_many(count: Result<u8, &str>) -> String {
     }
 }
 
-#[get("/assignment/<learner>")] 
+#[get("/assignment/<learner>")]
 fn assignment(learner: String, asgn_state: State<AssignmentState>) -> JSON<Assignment> {
     let mut asgns = asgn_state.0.lock().unwrap();
     let asgn = asgns.entry(learner.clone()).or_insert_with(|| {
@@ -58,29 +58,29 @@ fn assignment(learner: String, asgn_state: State<AssignmentState>) -> JSON<Assig
 }
 
 #[post("/block/<learner>/<key>")]
-fn complete_block(learner: String, key: Option<keys::UsageKey>, asgn_state: State<AssignmentState>) -> Result<JSON<Assignment>, ()> {
+fn complete_block(learner: String, key: Option<keys::UsageKey>, asgn_state: State<AssignmentState>) -> Option<JSON<Assignment>> {
     let mut asgns = asgn_state.0.lock().unwrap();
     if let Some(asgn) = asgns.get_mut(&learner) {
         match key {
             Some(usage_key) => {
                 if let Some(_) = asgn.units.iter().find(|x| x == &&usage_key) {
                     asgn.increment_completed();
-                    Ok(JSON(asgn.clone()))
+                    Some(JSON(asgn.clone()))
                 } else {
-                    Err(())
+                    None
                 }
             },
-            None => Err(()),
+            None => None
         }
     } else {
-        Err(())
+        None
     }
 }
 
 fn main() {
     let mut asgns: AssignmentState = AssignmentState(Arc::new(Mutex::new(HashMap::new())));
     rocket::ignite().mount(
-        "/", 
+        "/",
         routes![
             world,
             someone,
