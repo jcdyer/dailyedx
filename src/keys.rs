@@ -3,6 +3,7 @@ use std::str::FromStr;
 
 use serde::ser::{Serialize, Serializer};
 // use serde::de::Deserialize;
+use rocket::request::FromParam;
 
 use keys::BlockType::*;
 
@@ -113,6 +114,14 @@ impl Serialize for UsageKey {
     }
 }
 
+fn at_split<'a>(s: &'a str, category: &'a str) -> Option<&'a str> {
+    let mut iter = s.splitn(3, "@");
+    match (iter.nth(0), iter.nth(1), iter.nth(2)) {
+        (Some(x), Some(second), None) if x == category => Some(second),
+        _ => None,
+    }
+}
+
 impl FromStr for UsageKey {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -125,6 +134,10 @@ impl FromStr for UsageKey {
                     if parts.len() == 5 {
                         let (org, course, run) = (parts[0], parts[1], parts[2]);
                         let (blocktype, blockid) = (parts[3], parts[4]);
+                        let blocktype = at_split(blocktype, "type")
+                            .ok_or(format!("Bad type: {}", blocktype))?;
+                        let blockid = at_split(blockid, "block")
+                            .ok_or(format!("Bad blockid: {}", blockid))?;
                         let course_key = CourseKey::new(
                             org.to_string(),
                             course.to_string(),
@@ -148,6 +161,12 @@ impl FromStr for UsageKey {
     }
 }
 
+impl <'a> FromParam<'a> for UsageKey {
+    type Error = String;
+    fn from_param(param: &'a str) -> Result<Self, Self::Error> {
+        param.parse()
+    }
+}
 
 #[cfg(test)]
 mod tests {

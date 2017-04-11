@@ -1,11 +1,11 @@
 use super::keys;
 
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Assignment {
     learner: String,
     completed: u32,
-    units: Vec<keys::UsageKey>,
+    pub units: Vec<keys::UsageKey>,
 }
 
 
@@ -17,4 +17,8 @@ impl Assignment {
             units: units,
         }
     }
+    pub fn increment_completed(&mut self) {
+        self.completed += 1;
+    }
+
 }

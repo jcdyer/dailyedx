@@ -1,45 +1,47 @@
+use std::str::FromStr;
 
-use super::keys::{CourseKey, UsageKey, BlockType};
+use super::keys::{CourseKey, UsageKey};
+
+
+fn parseable<T: FromStr>(entries: Vec<&str>) -> Vec<T> {
+    entries.iter()
+        .map(|x| x.parse::<T>())
+        .filter_map(|x| x.ok())
+        .collect()
+}
 
 
 pub fn get_courses(learner: &str) -> Vec<CourseKey> {
     match learner {
-        "sandy@edx.org" => vec![
-            "course-v1:EduCauseX+TeamBasedLearning+2017T1".parse().unwrap(),
-        ],
-        "cdyer@edx.org" => vec![
-            "course-v1:EduCauseX+TeamBasedLearning+2017T1".parse().unwrap(),
-            "course-v1:LongfellowX+PaulReveresRide+1775T1".parse().unwrap(),
-        ],
-        _ => vec![
-            "course-v1:LongfellowX+PaulReveresRide+1775T1".parse().unwrap(),
-        ],
+        "sandy@edx.org" => parseable(vec![
+            "course-v1:EduCauseX+TeamBasedLearning+2017T1",
+        ]),
+        "cdyer@edx.org" => parseable(vec![
+            "course-v1:EduCauseX+TeamBasedLearning+2017T1",
+            "course-v1:LongfellowX+PaulReveresRide+1775T1",
+        ]),
+        "greg@edx.org" => parseable(vec![
+            "course-v1:LongfellowX+PaulReveresRide+1775T1",
+        ]),
+        "nimisha@edx.org" => parseable(vec![
+            "course-v1:EduCauseX+TeamBasedLearning+2017T1",
+            "course-v1:LongfellowY+PaulReveresRide+1775T1",
+        ]),
+        _ => vec![],
     }
 }
 
 
 pub fn get_blocks(course: &CourseKey) -> Vec<UsageKey> {
     match course {
-        &CourseKey { ref org, .. } if org == &"LongfellowX" => {
-            vec![
-                "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@vertical+block@signal".parse().unwrap(),
-                "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@vertical+block@church".parse().unwrap(),
-            ]
-        },
-        &CourseKey { ref org, .. } if org == &"EduCauseX" => {
-            vec![
-                UsageKey::new(
-                    course.clone(),
-                    BlockType::Vertical,
-                    "think-pair-share".to_string()
-                ),
-                UsageKey::new(
-                    course.clone(),
-                    BlockType::Vertical,
-                    "flippedclass".to_string()
-                ),
-            ]
-        },
+        &CourseKey { ref org, .. } if org == &"LongfellowX" => parseable(vec![
+            "block-v1:LongfellowX+PaulReveresRide+1775T1+type@vertical+block@signal",
+            "block-v1:LongfellowX+PaulReveresRide+1775T1+type@vertical+block@church",
+        ]),
+        &CourseKey { ref org, .. } if org == &"EduCauseX" => parseable(vec![
+            "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@vertical+block@think-pair-share",
+            "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@vertical+block@flipped-class",
+        ]),
         _ => vec![],
     }
 }
