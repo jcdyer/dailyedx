@@ -15,6 +15,7 @@ pub struct CourseKey {
     pub run: String,
 }
 
+
 impl CourseKey {
     pub fn new(org: String, course: String, run: String) -> CourseKey {
         CourseKey {
@@ -24,14 +25,14 @@ impl CourseKey {
         }
     }
 
-    fn short_fmt(&self) -> String {
+    fn display_fragment(&self) -> String {
        format!("{}+{}+{}", self.org, self.course, self.run)
     }
 }
 
 impl fmt::Display for CourseKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "course-v1:{}", self.short_fmt())
+        write!(f, "course-v1:{}", self.display_fragment())
     }
 }
 
@@ -103,7 +104,13 @@ impl UsageKey {
 
 impl fmt::Display for UsageKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "block-v1:{}+type@{}+block@{}", self.course_key.short_fmt(), self.block_type, self.block_id)
+        write!(
+            f,
+            "block-v1:{}+type@{}+block@{}",
+            self.course_key.display_fragment(),
+            self.block_type,
+            self.block_id,
+        )
     }
 }
 

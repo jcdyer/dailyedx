@@ -25,7 +25,7 @@ mod keys;
 
 struct AssignmentState(Arc<Mutex<HashMap<(String, Date), Assignment>>>);
 
-#[get("/assignment/<learner>/<dt>")]
+#[get("/<learner>/<dt>")]
 fn assignment(learner: String, dt: Date, asgn_state: State<AssignmentState>) -> Option<JSON<Assignment>> {
     let mut asgns = asgn_state.0.lock().unwrap();
     let asgn = asgns.entry((learner.clone(), dt.clone())).or_insert_with(move || {
@@ -42,7 +42,7 @@ fn assignment(learner: String, dt: Date, asgn_state: State<AssignmentState>) -> 
 }
 
 
-#[post("/assignment/<learner>/<dt>")]
+#[post("/<learner>/<dt>")]
 fn complete_block(learner: String, dt: Date, asgn_state: State<AssignmentState>) -> Option<JSON<Assignment>> {
     let mut asgns = asgn_state.0.lock().unwrap();
     if let Some(asgn) = asgns.get_mut(&(learner.clone(), dt)) {
@@ -53,7 +53,7 @@ fn complete_block(learner: String, dt: Date, asgn_state: State<AssignmentState>)
     }
 }
 
-#[delete("/assignment/<learner>/<dt>")]
+#[delete("/<learner>/<dt>")]
 fn uncomplete_block(learner: String, dt: Date, asgn_state: State<AssignmentState>) -> Option<JSON<Assignment>> {
     let mut asgns = asgn_state.0.lock().unwrap();
     if let Some(asgn) = asgns.get_mut(&(learner.clone(), dt)) {
@@ -67,7 +67,7 @@ fn uncomplete_block(learner: String, dt: Date, asgn_state: State<AssignmentState
 fn main() {
     let asgns: AssignmentState = AssignmentState(Arc::new(Mutex::new(HashMap::new())));
     rocket::ignite().mount(
-        "/",
+        "/dailyedx",
         routes![
             assignment,
             complete_block,
