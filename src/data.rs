@@ -36,11 +36,11 @@ pub fn get_blocks(course: &CourseKey) -> Vec<UsageKey> {
     match course {
         &CourseKey { ref org, .. } if org == &"LongfellowX" => parseable(vec![
             "block-v1:LongfellowX+PaulReveresRide+1775T1+type@vertical+block@signal",
-            "block-v1:LongfellowX+PaulReveresRide+1775T1+type@vertical+block@church",
+            "block-v1:LongfellowX+PaulReveresRide+1775T1+type@sequential+block@church",
         ]),
         &CourseKey { ref org, .. } if org == &"EduCauseX" => parseable(vec![
             "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@vertical+block@think-pair-share",
-            "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@vertical+block@flipped-class",
+            "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@unit+block@flipped-class",
         ]),
         _ => vec![],
     }

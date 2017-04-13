@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["J. Cliff Dyer <jcd@sdf.org>"]
 
 [dependencies]
+chrono = "0.3"
 rocket = "0.2"
 rocket_codegen = "0.2"
 serde = "0.9"
