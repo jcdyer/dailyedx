@@ -16,77 +16,62 @@ use rocket::State;
 use rocket_contrib::JSON;
 
 use self::assignments::Assignment;
+use self::date::Date;
 
 mod assignments;
-mod keys;
 mod data;
+mod date;
+mod keys;
 
-struct AssignmentState(Arc<Mutex<HashMap<String, Assignment>>>);
+struct AssignmentState(Arc<Mutex<HashMap<(String, Date), Assignment>>>);
 
-#[get("/world")]
-fn world() -> &'static str {
-    "Hello, world!"
-}
-
-#[get("/<name>")]
-fn someone(name: &str) -> String {
-    format!("Hello, {}!", name)
-}
-
-#[get("/count/<count>")]
-fn how_many(count: Result<u8, &str>) -> String {
-    match count {
-        Ok(n) => format!("Counted {}", n),
-        Err(err) => format!("Couldn't count {}", err),
-    }
-}
-
-#[get("/assignment/<learner>")]
-fn assignment(learner: String, asgn_state: State<AssignmentState>) -> JSON<Assignment> {
+#[get("/assignment/<learner>/<dt>")]
+fn assignment(learner: String, dt: Date, asgn_state: State<AssignmentState>) -> Option<JSON<Assignment>> {
     let mut asgns = asgn_state.0.lock().unwrap();
-    let asgn = asgns.entry(learner.clone()).or_insert_with(|| {
-        println!("Creating new entry for {}", learner);
+    let asgn = asgns.entry((learner.clone(), dt.clone())).or_insert_with(move || {
+        println!("Creating new entry for {} on {}", learner, dt.clone());
         let mut blocks = vec![];
         for course in data::get_courses(&learner) {
             for block in data::get_blocks(&course) {
                 blocks.push(block);
             }
         }
-        Assignment::new(learner, blocks)
+        Assignment::new(learner, dt, blocks)
     });
-    JSON(asgn.clone())
+    Some(JSON(asgn.clone()))
 }
 
-#[post("/block/<learner>/<key>")]
-fn complete_block(learner: String, key: Option<keys::UsageKey>, asgn_state: State<AssignmentState>) -> Option<JSON<Assignment>> {
+
+#[post("/assignment/<learner>/<dt>")]
+fn complete_block(learner: String, dt: Date, asgn_state: State<AssignmentState>) -> Option<JSON<Assignment>> {
     let mut asgns = asgn_state.0.lock().unwrap();
-    if let Some(asgn) = asgns.get_mut(&learner) {
-        match key {
-            Some(usage_key) => {
-                if let Some(_) = asgn.units.iter().find(|x| x == &&usage_key) {
-                    asgn.increment_completed();
-                    Some(JSON(asgn.clone()))
-                } else {
-                    None
-                }
-            },
-            None => None
-        }
+    if let Some(asgn) = asgns.get_mut(&(learner.clone(), dt)) {
+        asgn.increment_completed();
+        Some(JSON(asgn.clone()))
+    } else {
+        None
+    }
+}
+
+#[delete("/assignment/<learner>/<dt>")]
+fn uncomplete_block(learner: String, dt: Date, asgn_state: State<AssignmentState>) -> Option<JSON<Assignment>> {
+    let mut asgns = asgn_state.0.lock().unwrap();
+    if let Some(asgn) = asgns.get_mut(&(learner.clone(), dt)) {
+        asgn.decrement_completed();
+        Some(JSON(asgn.clone()))
     } else {
         None
     }
 }
 
 fn main() {
-    let mut asgns: AssignmentState = AssignmentState(Arc::new(Mutex::new(HashMap::new())));
+    let asgns: AssignmentState = AssignmentState(Arc::new(Mutex::new(HashMap::new())));
     rocket::ignite().mount(
         "/",
         routes![
-            world,
-            someone,
-            how_many,
             assignment,
             complete_block,
+            uncomplete_block,
         ])
         .manage(asgns)
         .launch();
