@@ -186,16 +186,19 @@ class UsernameInput extends React.Component {
 
 class ProgressBar extends React.Component {
   render () {
+    const edxBlue = "#0075b4"
+    const edxPink = "#c2387d"
+    const edxGray = "#d9d9d9"
     let bars = []
     let i = 0;
     for (i = 0; i < this.props.total; i += 1) {
-    let color = "gray"
+    let color = edxGray 
     if (i < this.props.completed) {
-      color = "blue"
+      color = edxBlue
     } else if (i === this.props.completed) {
-      color = "pink"
+      color = edxPink
     } else {
-      color = "white"
+      color =  edxGray
     }
     bars.push(color)
   }
