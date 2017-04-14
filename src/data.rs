@@ -1,5 +1,11 @@
+use std::env;
+use std::fs::File;
+
 use std::str::FromStr;
 
+use serde_json::{self, Value}; 
+
+use super::date::Date;
 use super::keys::{CourseKey, UsageKey};
 
 
@@ -12,36 +18,43 @@ fn parseable<T: FromStr>(entries: Vec<&str>) -> Vec<T> {
 
 
 pub fn get_courses(learner: &str) -> Vec<CourseKey> {
-    match learner {
-        "sandy@edx.org" => parseable(vec![
-            "course-v1:EduCauseX+TeamBasedLearning+2017T1",
-        ]),
-        "cdyer@edx.org" => parseable(vec![
-            "course-v1:EduCauseX+TeamBasedLearning+2017T1",
-            "course-v1:LongfellowX+PaulReveresRide+1775T1",
-        ]),
-        "greg@edx.org" => parseable(vec![
-            "course-v1:LongfellowX+PaulReveresRide+1775T1",
-        ]),
-        "nimisha@edx.org" => parseable(vec![
-            "course-v1:EduCauseX+TeamBasedLearning+2017T1",
-            "course-v1:LongfellowY+PaulReveresRide+1775T1",
-        ]),
-        _ => vec![],
-    }
+
+    let mut path = env::current_dir().unwrap();
+    path.push("static");
+    path.push("enrollments.json");
+    let js: Value = match File::open(path.as_path()) {
+        Ok(r) => serde_json::from_reader(r).expect("Data file was not valid JSON"),
+        Err(_) => return vec![],
+    };
+    let mut vec = Vec::new();
+    if let Value::Array(ref enrollments) = js[learner] {
+        for element in enrollments {
+            match element {
+                &Value::String(ref s) => vec.push(s.as_str()),
+                _ => return vec![],
+            }
+        }
+    };
+    parseable(vec)
 }
+        
 
-
-pub fn get_blocks(course: &CourseKey) -> Vec<UsageKey> {
-    match course {
-        &CourseKey { ref org, .. } if org == &"LongfellowX" => parseable(vec![
-            "block-v1:LongfellowX+PaulReveresRide+1775T1+type@vertical+block@signal",
-            "block-v1:LongfellowX+PaulReveresRide+1775T1+type@sequential+block@church",
-        ]),
-        &CourseKey { ref org, .. } if org == &"EduCauseX" => parseable(vec![
-            "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@vertical+block@think-pair-share",
-            "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@unit+block@flipped-class",
-        ]),
-        _ => vec![],
-    }
+pub fn get_blocks(course: &CourseKey, date: Date) -> Vec<UsageKey> {
+    let mut path = env::current_dir().unwrap();
+    path.push("static");
+    path.push("blocks.json");
+    let js: Value = match File::open(path.as_path()) {
+        Ok(r) => serde_json::from_reader(r).expect("Data file was not valid JSON"),
+        Err(_) => return vec![],
+    };
+    let mut vec = Vec::new();
+    if let Value::Array(ref arr) = js[format!("{}", course)][format!("{}", date)] {
+        for element in arr {
+            match element {
+                &Value::String(ref s) => vec.push(s.as_str()),
+                _ => return vec![],
+            }
+        }
+    };
+    parseable(vec)
 }

@@ -3,9 +3,9 @@
 
 extern crate rocket;
 
-#[macro_use]
-extern crate serde_derive;
 extern crate serde;
+#[macro_use] extern crate serde_derive;
+extern crate serde_json;
 
 extern crate rocket_contrib;
 
@@ -45,7 +45,7 @@ fn assignment(learner: String, dt: Date, asgn_state: State<AssignmentState>) -> 
         println!("Creating new entry for {} on {}", learner, dt.clone());
         let mut blocks = vec![];
         for course in data::get_courses(&learner) {
-            for block in data::get_blocks(&course) {
+            for block in data::get_blocks(&course, dt.clone()) {
                 blocks.push(block);
             }
         }
