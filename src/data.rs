@@ -9,6 +9,34 @@ use super::date::Date;
 use super::keys::{CourseKey, UsageKey};
 
 
+pub fn get_courses(learner: &str) -> Vec<CourseKey> {
+    let js = json_file("enrollments.json").unwrap();
+    if let Value::Array(ref enrollments) = js[learner] {
+        parseable(
+            enrollments.iter()
+                .filter_map(|el| el.as_str())
+                .collect()
+        )
+    } else {
+        vec![]
+    }
+}
+        
+
+pub fn get_blocks(course: &CourseKey, date: Date) -> Vec<UsageKey> {
+    let js = json_file("blocks.json").unwrap();
+    if let Value::Array(ref arr) = js[format!("{}", course)][format!("{}", date)] {
+        parseable(
+            arr.iter()
+                .filter_map(|el| el.as_str())
+                .collect()
+        )
+    } else {
+        vec![]
+    }
+}
+
+
 fn parseable<T: FromStr>(entries: Vec<&str>) -> Vec<T> {
     entries.iter()
         .map(|x| x.parse::<T>())
@@ -17,44 +45,10 @@ fn parseable<T: FromStr>(entries: Vec<&str>) -> Vec<T> {
 }
 
 
-pub fn get_courses(learner: &str) -> Vec<CourseKey> {
-
+fn json_file(name: &str) -> serde_json::Result<Value> {
     let mut path = env::current_dir().unwrap();
     path.push("static");
-    path.push("enrollments.json");
-    let js: Value = match File::open(path.as_path()) {
-        Ok(r) => serde_json::from_reader(r).expect("Data file was not valid JSON"),
-        Err(_) => return vec![],
-    };
-    let mut vec = Vec::new();
-    if let Value::Array(ref enrollments) = js[learner] {
-        for element in enrollments {
-            match element {
-                &Value::String(ref s) => vec.push(s.as_str()),
-                _ => return vec![],
-            }
-        }
-    };
-    parseable(vec)
-}
-        
-
-pub fn get_blocks(course: &CourseKey, date: Date) -> Vec<UsageKey> {
-    let mut path = env::current_dir().unwrap();
-    path.push("static");
-    path.push("blocks.json");
-    let js: Value = match File::open(path.as_path()) {
-        Ok(r) => serde_json::from_reader(r).expect("Data file was not valid JSON"),
-        Err(_) => return vec![],
-    };
-    let mut vec = Vec::new();
-    if let Value::Array(ref arr) = js[format!("{}", course)][format!("{}", date)] {
-        for element in arr {
-            match element {
-                &Value::String(ref s) => vec.push(s.as_str()),
-                _ => return vec![],
-            }
-        }
-    };
-    parseable(vec)
+    path.push(name);
+    let f = File::open(path.as_path())?;
+    serde_json::from_reader(f)
 }
