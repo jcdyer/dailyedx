@@ -1,6 +1,40 @@
+use std::env;
+use std::fs::File;
+
 use std::str::FromStr;
 
+use serde_json::{self, Value}; 
+
+use super::date::Date;
 use super::keys::{CourseKey, UsageKey};
+
+
+pub fn get_courses(learner: &str) -> Vec<CourseKey> {
+    let js = json_file("enrollments.json").unwrap();
+    if let Value::Array(ref enrollments) = js[learner] {
+        parseable(
+            enrollments.iter()
+                .filter_map(|el| el.as_str())
+                .collect()
+        )
+    } else {
+        vec![]
+    }
+}
+        
+
+pub fn get_blocks(course: &CourseKey, date: Date) -> Vec<UsageKey> {
+    let js = json_file("blocks.json").unwrap();
+    if let Value::Array(ref arr) = js[format!("{}", course)][format!("{}", date)] {
+        parseable(
+            arr.iter()
+                .filter_map(|el| el.as_str())
+                .collect()
+        )
+    } else {
+        vec![]
+    }
+}
 
 
 fn parseable<T: FromStr>(entries: Vec<&str>) -> Vec<T> {
@@ -11,37 +45,10 @@ fn parseable<T: FromStr>(entries: Vec<&str>) -> Vec<T> {
 }
 
 
-pub fn get_courses(learner: &str) -> Vec<CourseKey> {
-    match learner {
-        "sandy@edx.org" => parseable(vec![
-            "course-v1:EduCauseX+TeamBasedLearning+2017T1",
-        ]),
-        "cdyer@edx.org" => parseable(vec![
-            "course-v1:EduCauseX+TeamBasedLearning+2017T1",
-            "course-v1:LongfellowX+PaulReveresRide+1775T1",
-        ]),
-        "greg@edx.org" => parseable(vec![
-            "course-v1:LongfellowX+PaulReveresRide+1775T1",
-        ]),
-        "nimisha@edx.org" => parseable(vec![
-            "course-v1:EduCauseX+TeamBasedLearning+2017T1",
-            "course-v1:LongfellowY+PaulReveresRide+1775T1",
-        ]),
-        _ => vec![],
-    }
-}
-
-
-pub fn get_blocks(course: &CourseKey) -> Vec<UsageKey> {
-    match course {
-        &CourseKey { ref org, .. } if org == &"LongfellowX" => parseable(vec![
-            "block-v1:LongfellowX+PaulReveresRide+1775T1+type@vertical+block@signal",
-            "block-v1:LongfellowX+PaulReveresRide+1775T1+type@sequential+block@church",
-        ]),
-        &CourseKey { ref org, .. } if org == &"EduCauseX" => parseable(vec![
-            "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@vertical+block@think-pair-share",
-            "block-v1:EduCauseX+TeamBasedLearning+2017T1+type@unit+block@flipped-class",
-        ]),
-        _ => vec![],
-    }
+fn json_file(name: &str) -> serde_json::Result<Value> {
+    let mut path = env::current_dir().unwrap();
+    path.push("static");
+    path.push(name);
+    let f = File::open(path.as_path())?;
+    serde_json::from_reader(f)
 }
