@@ -12,11 +12,7 @@ function makeUrl (username) {
 class App extends React.Component {
   constructor (props) {
     super(props)
-    this.state = {
-      'courses': [],
-      'units': [],
-      'username': ''
-    }
+    this.state = {'username': ''}
     this.updateUsername = this.updateUsername.bind(this)
   }
 
@@ -94,26 +90,37 @@ class Welcome extends React.Component {
 }
 
 class Problems extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {'activeProblem': 0}
+    this.goToNextProblem = this.goToNextProblem.bind(this)
+  }
+
+  goToNextProblem () {
+    this.setState({'activeProblem': this.state.activeProblem + 1})
+  }
+
   render () {
     const problems = this.props.units.map((problem, index) =>
-      <Problem key={problem} loc={problem} index={index}/>
+      <Problem
+        key={problem}
+        loc={problem}
+        active={index == this.state.activeProblem}
+        goToNextProblem={this.goToNextProblem}/>
     )
     return <ul> {problems} </ul>
   }
 }
 
 class Problem extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = {'active': false}
-  }
   render () {
     console.log(this.props.index)
-    if (this.props.index === 0) {
+    if (this.props.active) {
       return (
         <li>
           I am a problem of location {this.props.loc}
           <XBlockView xblockurl={'https://courses.edx.org/xblock/' + this.props.loc} />
+          <button onClick={this.props.goToNextProblem}>NEXT</button>
         </li>
       )
     }
