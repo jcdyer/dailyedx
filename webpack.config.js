@@ -1,4 +1,4 @@
-var path = require('path')
+const path = require('path')
 
 module.exports = {
   entry: './frontend/src/index.jsx',
@@ -12,6 +12,14 @@ module.exports = {
         test: /\.jsx?/,
         include: path.resolve(__dirname, 'frontend/src'),
         loader: 'babel-loader'
+      },
+      {
+        test: /\.scss$/,
+        loaders: [
+          'style-loader',
+          'css-loader',
+          'sass-loader'
+        ]
       }
     ]
   }

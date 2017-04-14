@@ -1,0 +1,6 @@
+$pattern-library-path: '../../node_modules/edx-pattern-library' !default;
+@import 'edx-pattern-library/pattern-library/sass/edx-pattern-library-ltr';
+
+div {
+    color: blue
+}

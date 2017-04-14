@@ -1,6 +1,7 @@
 import React from 'react'
 import {render} from 'react-dom'
 import $ from 'jquery'
+import style from './main.scss';
 
 function makeUrl (username) {
   const today = new Date()
