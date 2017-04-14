@@ -63,10 +63,12 @@ class Context extends React.Component {
       )
     } else if (this.state.stage == 1) {
       return (
-        <Problems
-          username={this.props.username}
-          units={this.state.units}
-          updateStage={this.updateStage}/>
+        <div>
+          <Problems
+            username={this.props.username}
+            units={this.state.units}
+            updateStage={this.updateStage}/>
+        </div>
       )
     } else {
       return (
@@ -101,30 +103,28 @@ class Problems extends React.Component {
   }
 
   render () {
-    const problems = this.props.units.map((problem, index) =>
-      <Problem
-        key={problem}
-        loc={problem}
-        active={index == this.state.activeProblem}
-        goToNextProblem={this.goToNextProblem}/>
+    const problem = this.props.units[this.state.activeProblem]
+    
+    return (
+      <div>
+        <ProgressBar completed={this.state.activeProblem} total={this.props.units.length}/>
+        <Problem
+          key={problem}
+          loc={problem}
+          goToNextProblem={this.goToNextProblem}/>
+      </div>
     )
-    return <ul> {problems} </ul>
   }
 }
 
 class Problem extends React.Component {
   render () {
-    console.log(this.props.index)
-    if (this.props.active) {
-      return (
-        <li>
-          I am a problem of location {this.props.loc}
-          <XBlockView xblockurl={'https://courses.edx.org/xblock/' + this.props.loc} />
-          <button onClick={this.props.goToNextProblem}>NEXT</button>
-        </li>
-      )
-    }
-    return <li> not rendering {this.props.loc}</li>
+    return (
+      <div>
+        <XBlockView xblockurl={'https://courses.edx.org/xblock/' + this.props.loc} />
+        <button onClick={this.props.goToNextProblem}>NEXT</button>
+      </div>
+    )
   }
 
   handleClick () {
@@ -180,6 +180,31 @@ class UsernameInput extends React.Component {
         </label>
         <input type="submit" value="Submit" />
       </form>
+    )
+  }
+}
+
+class ProgressBar extends React.Component {
+  render () {
+    let bars = []
+    let i = 0;
+    for (i = 0; i < this.props.total; i += 1) {
+    let color = "gray"
+    if (i < this.props.completed) {
+      color = "blue"
+    } else if (i === this.props.completed) {
+      color = "pink"
+    } else {
+      color = "white"
+    }
+    bars.push(color)
+  }
+  const elements = bars.map( 
+    (fillColor, index) => <span key={index} style={ { backgroundColor: fillColor, color: fillColor, width: (100 / this.props.total) + '%', height: '4pt', marginRight: '3px'} } className="progress-tick"> index </span>
+  )
+      
+    return (
+      <div style={ {width: '100%', marginBottom: '.5em'} } className='progressbar'>{elements}</div>
     )
   }
 }
