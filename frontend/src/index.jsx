@@ -2,10 +2,10 @@ import React from 'react'
 import {render} from 'react-dom'
 import $ from 'jquery'
 
-function makeUrl (email) {
+function makeUrl (username) {
   const today = new Date()
   const date = today.toISOString().slice(0, 10)
-  const url = '/dailyedx/' + email + '/' + date
+  const url = '/dailyedx/' + username + '/' + date
   return url
 }
 
@@ -15,20 +15,20 @@ class App extends React.Component {
     this.state = {
       'courses': [],
       'units': [],
-      'email': 'cdyer@edx.org'
+      'username': 'adampalay'
     }
-    this.updateEmail = this.updateEmail.bind(this)
+    this.updateUsername = this.updateUsername.bind(this)
   }
 
-  updateEmail (email) {
-    this.setState({'email': email})
+  updateUsername (username) {
+    this.setState({'username': username})
   }
 
   render () {
-    if (this.state.email) {
-      return <Context email={this.state.email} />
+    if (this.state.username) {
+      return <Context username={this.state.username} />
     }
-    return <EmailInput updateEmail={this.updateEmail} />
+    return <UsernameInput updateUsername={this.updateUsername} />
   }
 }
 
@@ -39,7 +39,7 @@ class Context extends React.Component {
   }
 
   componentDidMount () {
-    const url = makeUrl(this.props.email)
+    const url = makeUrl(this.props.username)
     const self = this
     $.getJSON(url, function (data) {
       self.setState(
@@ -51,9 +51,9 @@ class Context extends React.Component {
   render () {
     return (
         <div>
-          <Welcome email={this.props.email} toComplete={this.state.units.length} />
-          <Problems email={this.props.email} units={this.state.units} />
-          <Congratulations email={this.props.email} units={this.state.completed} />
+          <Welcome username={this.props.username} toComplete={this.state.units.length} />
+          <Problems username={this.props.username} units={this.state.units} />
+          <Congratulations username={this.props.username} units={this.state.completed} />
         </div>
     )
   }
@@ -63,7 +63,7 @@ class Welcome extends React.Component {
   render () {
     return (
       <div>
-        hi {this.props.email}, you have to complete {this.props.toComplete} units
+        hi {this.props.username}, you have to complete {this.props.toComplete} units
       </div>
     )
   }
@@ -113,7 +113,7 @@ class Problem extends React.Component {
 
 class Congratulations extends React.Component {
   render () {
-    return <div> congrats {this.props.email} for completing {"today's"} problems! </div>
+    return <div> congrats {this.props.username} for completing {"today's"} problems! </div>
   }
 }
 
@@ -123,7 +123,7 @@ class XBlockView extends React.Component {
   }
 }
 
-class EmailInput extends React.Component {
+class UsernameInput extends React.Component {
   constructor (props) {
     super(props)
     this.state = {value: ''}
@@ -138,15 +138,15 @@ class EmailInput extends React.Component {
 
   handleSubmit (event) {
     event.preventDefault()
-    this.props.updateEmail(this.state.value)
+    this.props.updateUsername(this.state.value)
   }
 
   render () {
     return (
       <form onSubmit={this.handleSubmit}>
         <label>
-          What is your email address?
-          <input type="email" value={this.state.value} onChange={this.handleChange} />
+          What is your username?
+          <input type="username" value={this.state.value} onChange={this.handleChange} />
         </label>
         <input type="submit" value="Submit" />
       </form>
