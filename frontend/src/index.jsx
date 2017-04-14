@@ -111,7 +111,12 @@ class Problems extends React.Component {
   }
 
   goToNextProblem () {
-    this.setState({'activeProblem': this.state.activeProblem + 1})
+		const next = this.state.activeProblem + 1
+	  if next < this.props.units.length {
+    	this.setState({'activeProblem': this.state.activeProblem + 1})
+		} else {
+			this.props.updateStage()
+		}
   }
 
   render () {
