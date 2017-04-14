@@ -51,7 +51,7 @@ class Context extends React.Component {
   render () {
     return (
         <div>
-          <Welcome email={this.props.email} completed={this.state.completed} />
+          <Welcome email={this.props.email} toComplete={this.state.units.length} />
           <Problems email={this.props.email} units={this.state.units} />
           <Congratulations email={this.props.email} units={this.state.completed} />
         </div>
@@ -63,7 +63,7 @@ class Welcome extends React.Component {
   render () {
     return (
       <div>
-        hi {this.props.email}, you have completed {this.props.completed} units
+        hi {this.props.email}, you have to complete {this.props.toComplete} units
       </div>
     )
   }
@@ -72,20 +72,48 @@ class Welcome extends React.Component {
 class Problems extends React.Component {
   render () {
     console.log(this.props.units)
-    const problems = this.props.units.map((problem) => <Problem key={problem} loc={problem} />)
+    const problems = this.props.units.map((problem, index) =>
+      <Problem key={problem} loc={problem} index={index}/>
+    )
     return <ul> {problems} </ul>
   }
 }
 
 class Problem extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {'active': false}
+  }
   render () {
-    return <li> I am a problem of location {this.props.loc} </li>
+    console.log(this.props.index)
+    if (this.props.index === 0){
+      return (
+        <li>
+          I am a problem of location {this.props.loc}
+          <XBlockView xblockurl={"https://courses.edx.org/xblock/" + this.props.loc} />
+        </li>
+      )
+    }
+    return <li> not rendering {this.props.loc}</li>
+  }
+
+  handleClick () {
+    console.log(this.props.loc)
+    toggleActive()
+  }
+
+  toggleActive () {
+    if (this.state.active) {
+      this.setState({'active': false})
+    } else {
+      this.setState({'active': true})
+    }
   }
 }
 
 class Congratulations extends React.Component {
   render () {
-    return <div> congrats {this.props.email} for completing today's problems! </div>
+    return <div> congrats {this.props.email} for completing {"today's"} problems! </div>
   }
 }
 
