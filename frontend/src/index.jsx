@@ -1,7 +1,7 @@
 import React from 'react'
 import {render} from 'react-dom'
 import $ from 'jquery'
-import style from './main.scss';
+import style from './main.scss'
 
 function makeUrl (username) {
   const today = new Date()
@@ -84,20 +84,27 @@ class Context extends React.Component {
 class Welcome extends React.Component {
   render () {
     return (
-      <div>
-        hi {this.props.username}, you have to complete {this.props.toComplete} units
-        <button
-          onClick={this.props.updateStage}
-          className="btn btn-success">
-            I am ready to answer some questions!
+      <div className="container">
+          <p className="row lead">
+            Hello {this.props.username}!
+          </p>
+          <p className="row">
+           Do you think you can knock off {this.props.toComplete} units today?
+          </p>
+        <div className="row">
+          <button
+            onClick={this.props.updateStage}
+            className="btn btn-success">
+              Heck yeah I do!
           </button>
+        </div>
       </div>
     )
   }
 }
 
 class Problems extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {'activeProblem': 0}
     this.goToNextProblem = this.goToNextProblem.bind(this)
@@ -127,7 +134,7 @@ class Problem extends React.Component {
     return (
       <div>
         <XBlockView xblockurl={'https://courses.edx.org/xblock/' + this.props.loc} />
-        <button className="btn btn-success" onClick={this.props.goToNextProblem}>NEXT</button>
+        <button className="btn btn-success" onClick={this.props.goToNextProblem}>Next Unit</button>
       </div>
     )
   }
@@ -154,7 +161,7 @@ class Congratulations extends React.Component {
 
 class XBlockView extends React.Component {
   render () {
-    return <iframe src={this.props.xblockurl} width="500" height="1000"/>
+    return <iframe src={this.props.xblockurl} width="1000" height="500"/>
   }
 }
 
@@ -191,23 +198,23 @@ class UsernameInput extends React.Component {
 
 class ProgressBar extends React.Component {
   render () {
-    const edxBlue = "#0075b4"
-    const edxPink = "#c2387d"
-    const edxGray = "#d9d9d9"
+    const edxBlue = '#0075b4'
+    const edxPink = '#c2387d'
+    const edxGray = '#d9d9d9'
     let bars = []
-    let i = 0;
+    let i = 0
     for (i = 0; i < this.props.total; i += 1) {
-    let color = edxGray 
-    if (i < this.props.completed) {
-      color = edxBlue
-    } else if (i === this.props.completed) {
-      color = edxPink
-    } else {
-      color =  edxGray
+      let color = edxGray
+      if (i < this.props.completed) {
+        color = edxBlue
+      } else if (i === this.props.completed) {
+        color = edxPink
+      } else {
+        color = edxGray
+      }
+      bars.push(color)
     }
-    bars.push(color)
-  }
-  const elements = bars.map(
+    const elements = bars.map(
     (fillColor, index) => <span key={index} style={ { backgroundColor: fillColor, color: fillColor, width: (100 / this.props.total) + '%', height: '4pt', marginRight: '3px'} } className="progress-tick"> index </span>
   )
 
