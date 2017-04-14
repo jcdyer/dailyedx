@@ -15,7 +15,7 @@ class App extends React.Component {
     this.state = {
       'courses': [],
       'units': [],
-      'email': ''
+      'email': 'cdyer@edx.org'
     }
     this.updateEmail = this.updateEmail.bind(this)
   }
@@ -35,23 +35,25 @@ class App extends React.Component {
 class Context extends React.Component {
   constructor (props) {
     super(props)
-    this.state = {'completed': 'waiting...'}
+    this.state = {'completed': 'waiting...', 'units': []}
   }
 
   componentDidMount () {
     const url = makeUrl(this.props.email)
     const self = this
     $.getJSON(url, function (data) {
-      self.setState({'completed': data['completed']})
+      self.setState(
+        {'completed': data['completed'], 'units': data['units']}
+      )
     })
   }
 
   render () {
     return (
         <div>
-          <Welcome email={this.props.email} units={this.props.units} completed={this.state.completed} />
-          <Problems email={this.props.email} units={this.props.units} />
-          <Congratulations email={this.props.email} units={this.props.units} />
+          <Welcome email={this.props.email} completed={this.state.completed} />
+          <Problems email={this.props.email} units={this.state.units} />
+          <Congratulations email={this.props.email} units={this.state.completed} />
         </div>
     )
   }
@@ -61,7 +63,7 @@ class Welcome extends React.Component {
   render () {
     return (
       <div>
-        hi {this.props.email}, you have ve completed {this.props.completed} units
+        hi {this.props.email}, you have completed {this.props.completed} units
       </div>
     )
   }
@@ -69,13 +71,21 @@ class Welcome extends React.Component {
 
 class Problems extends React.Component {
   render () {
-    return <div> Problems go here </div>
+    console.log(this.props.units)
+    const problems = this.props.units.map((problem) => <Problem key={problem} loc={problem} />)
+    return <ul> {problems} </ul>
+  }
+}
+
+class Problem extends React.Component {
+  render () {
+    return <li> I am a problem of location {this.props.loc} </li>
   }
 }
 
 class Congratulations extends React.Component {
   render () {
-    return <div> congrats go here </div>
+    return <div> congrats {this.props.email} for completing today's problems! </div>
   }
 }
 
