@@ -1,6 +1,7 @@
 import React from 'react'
 import {render} from 'react-dom'
 import $ from 'jquery'
+import style from './main.scss';
 
 function makeUrl (username) {
   const today = new Date()
@@ -85,7 +86,11 @@ class Welcome extends React.Component {
     return (
       <div>
         hi {this.props.username}, you have to complete {this.props.toComplete} units
-        <button onClick={this.props.updateStage} />
+        <button
+          onClick={this.props.updateStage}
+          className="btn btn-success">
+            I am ready to answer some questions!
+          </button>
       </div>
     )
   }
@@ -104,7 +109,7 @@ class Problems extends React.Component {
 
   render () {
     const problem = this.props.units[this.state.activeProblem]
-    
+
     return (
       <div>
         <ProgressBar completed={this.state.activeProblem} total={this.props.units.length}/>
@@ -122,7 +127,7 @@ class Problem extends React.Component {
     return (
       <div>
         <XBlockView xblockurl={'https://courses.edx.org/xblock/' + this.props.loc} />
-        <button onClick={this.props.goToNextProblem}>NEXT</button>
+        <button className="btn btn-success" onClick={this.props.goToNextProblem}>NEXT</button>
       </div>
     )
   }
@@ -202,10 +207,10 @@ class ProgressBar extends React.Component {
     }
     bars.push(color)
   }
-  const elements = bars.map( 
+  const elements = bars.map(
     (fillColor, index) => <span key={index} style={ { backgroundColor: fillColor, color: fillColor, width: (100 / this.props.total) + '%', height: '4pt', marginRight: '3px'} } className="progress-tick"> index </span>
   )
-      
+
     return (
       <div style={ {width: '100%', marginBottom: '.5em'} } className='progressbar'>{elements}</div>
     )
