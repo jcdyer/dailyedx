@@ -15,7 +15,7 @@ class App extends React.Component {
     this.state = {
       'courses': [],
       'units': [],
-      'username': 'adampalay'
+      'username': ''
     }
     this.updateUsername = this.updateUsername.bind(this)
   }
@@ -35,7 +35,16 @@ class App extends React.Component {
 class Context extends React.Component {
   constructor (props) {
     super(props)
-    this.state = {'completed': 'waiting...', 'units': []}
+    this.state = {
+      'completed': 'waiting...',
+      'units': [],
+      'stage': 0
+    }
+    this.updateStage = this.updateStage.bind(this)
+  }
+
+  updateStage () {
+    this.setState({'stage': this.state.stage + 1})
   }
 
   componentDidMount () {
@@ -49,13 +58,27 @@ class Context extends React.Component {
   }
 
   render () {
-    return (
-        <div>
-          <Welcome username={this.props.username} toComplete={this.state.units.length} />
-          <Problems username={this.props.username} units={this.state.units} />
-          <Congratulations username={this.props.username} units={this.state.completed} />
-        </div>
-    )
+    if (this.state.stage == 0) {
+      return (
+        <Welcome
+          username={this.props.username}
+          toComplete={this.state.units.length}
+          updateStage={this.updateStage}/>
+      )
+    } else if (this.state.stage == 1) {
+      return (
+        <Problems
+          username={this.props.username}
+          units={this.state.units}
+          updateStage={this.updateStage}/>
+      )
+    } else {
+      return (
+        <Congratulations
+          username={this.props.username}
+          units={this.state.completed}/>
+      )
+    }
   }
 }
 
@@ -64,6 +87,7 @@ class Welcome extends React.Component {
     return (
       <div>
         hi {this.props.username}, you have to complete {this.props.toComplete} units
+        <button onClick={this.props.updateStage} />
       </div>
     )
   }
@@ -71,7 +95,6 @@ class Welcome extends React.Component {
 
 class Problems extends React.Component {
   render () {
-    console.log(this.props.units)
     const problems = this.props.units.map((problem, index) =>
       <Problem key={problem} loc={problem} index={index}/>
     )
@@ -80,17 +103,17 @@ class Problems extends React.Component {
 }
 
 class Problem extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {'active': false}
   }
   render () {
     console.log(this.props.index)
-    if (this.props.index === 0){
+    if (this.props.index === 0) {
       return (
         <li>
           I am a problem of location {this.props.loc}
-          <XBlockView xblockurl={"https://courses.edx.org/xblock/" + this.props.loc} />
+          <XBlockView xblockurl={'https://courses.edx.org/xblock/' + this.props.loc} />
         </li>
       )
     }
