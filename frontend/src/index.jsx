@@ -111,12 +111,12 @@ class Problems extends React.Component {
   }
 
   goToNextProblem () {
-		const next = this.state.activeProblem + 1
-	  if next < this.props.units.length {
-    	this.setState({'activeProblem': this.state.activeProblem + 1})
-		} else {
-			this.props.updateStage()
-		}
+    const next = this.state.activeProblem + 1
+    if (next < this.props.units.length) {
+      this.setState({'activeProblem': this.state.activeProblem + 1})
+    } else {
+      this.props.updateStage()
+    }
   }
 
   render () {
@@ -160,7 +160,16 @@ class Problem extends React.Component {
 
 class Congratulations extends React.Component {
   render () {
-    return <div> congrats {this.props.username} for completing {"today's"} problems! </div>
+    const edxPink = "#c2387d"
+    return (
+      <div style={{textAlign: "center", fontSize: "200%" }} >
+        <h2 style={{color: edxPink, fontSize: "36pt"}}>{"Rockin'!"}</h2>
+        <p>You completed {"today's"} assignment!<br/>Come back tomorrow to keep rolling.</p>
+        <p>
+          <a href="https://www.youtube.com/watch?v=mRf3-JkwqfU" className="btn btn-success">Go watch Puppy Vids</a>
+        </p>
+      </div>
+    )
   }
 }
 
@@ -192,7 +201,7 @@ class UsernameInput extends React.Component {
     return (
       <form onSubmit={this.handleSubmit}>
         <label>
-          What is your username?
+          {"Log in: "}
           <input type="username" value={this.state.value} onChange={this.handleChange} />
         </label>
         <input type="submit" value="Submit" />
@@ -219,12 +228,13 @@ class ProgressBar extends React.Component {
       }
       bars.push(color)
     }
+    const width = 480
     const elements = bars.map(
-    (fillColor, index) => <span key={index} style={ { backgroundColor: fillColor, color: fillColor, width: (100 / this.props.total) + '%', height: '4pt', marginRight: '3px'} } className="progress-tick"> index </span>
+    (fillColor, index) => <span key={index} style={ { backgroundColor: fillColor, color: fillColor, width: (width / this.props.total) + 'px', height: '4px', marginRight: '3px'} } className="progress-tick"> index </span>
   )
 
     return (
-      <div style={ {width: '100%', marginBottom: '.5em'} } className='progressbar'>{elements}</div>
+      <div style={ {width: width + 'px', marginBottom: '.5em'} } className='progressbar'>{elements}</div>
     )
   }
 }
