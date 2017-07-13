@@ -14,6 +14,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
+use rocket::response::content;
 use rocket::response::NamedFile;
 use rocket::State;
 use rocket_contrib::JSON;
@@ -24,13 +25,19 @@ use self::date::Date;
 mod assignments;
 mod data;
 mod date;
+mod frontend;
 mod keys;
 
 struct AssignmentState(Arc<Mutex<HashMap<(String, Date), Assignment>>>);
 
 #[get("/")]
-fn index() -> io::Result<NamedFile> {
-    NamedFile::open("frontend/index.html")
+fn index() -> content::HTML<&'static str> {
+    content::HTML(frontend::INDEX)
+}
+
+#[get("/frontend/build/bundle.js")]
+fn bundle() -> content::JavaScript<&'static str> {
+    content::JavaScript(frontend::BUNDLE)
 }
 
 #[get("/frontend/build/<file..>")]
@@ -82,6 +89,7 @@ fn main() {
     rocket::ignite().mount(
         "/dailyedx",
         routes![
+            bundle,
             index,
             files,
             assignment,

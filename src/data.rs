@@ -10,7 +10,8 @@ use super::keys::{CourseKey, UsageKey};
 
 
 pub fn get_courses(learner: &str) -> Vec<CourseKey> {
-    let js = json_file("enrollments.json").unwrap();
+    let json_str = include_str!("../static/enrollments.json");
+    let js: Value = serde_json::from_str(json_str).unwrap();
     if let Value::Array(ref enrollments) = js[learner] {
         parseable(
             enrollments.iter()
@@ -24,7 +25,8 @@ pub fn get_courses(learner: &str) -> Vec<CourseKey> {
         
 
 pub fn get_blocks(course: &CourseKey, date: Date) -> Vec<UsageKey> {
-    let js = json_file("blocks.json").unwrap();
+    let json_str = include_str!("../static/blocks.json");
+    let js: Value = serde_json::from_str(json_str).unwrap();
     if let Value::Array(ref arr) = js[format!("{}", course)][format!("{}", date)] {
         parseable(
             arr.iter()
@@ -42,13 +44,4 @@ fn parseable<T: FromStr>(entries: Vec<&str>) -> Vec<T> {
         .map(|x| x.parse::<T>())
         .filter_map(|x| x.ok())
         .collect()
-}
-
-
-fn json_file(name: &str) -> serde_json::Result<Value> {
-    let mut path = env::current_dir().unwrap();
-    path.push("static");
-    path.push(name);
-    let f = File::open(path.as_path())?;
-    serde_json::from_reader(f)
 }
